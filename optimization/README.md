@@ -2,4 +2,4 @@
 <br>
 <br>
 
-<img src="../media/particle_swarm_formula.png">
+<img src="../media/particle_swarm_formula.png" width=80% height=auto/>
