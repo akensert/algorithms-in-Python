@@ -1,6 +1,6 @@
 
 def quick_sort(array, low_idx, high_idx):
-    """recursive version of quicksort, pivoting on
+    """recursive variant of quicksort, pivoting on
     the last element ('high_idx') of the (sub)arrays"""
 
     if low_idx < high_idx:
@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
     array = input('input a sequence of single digit integers: ')
     print('array inputted:', array)
-    array = [int(i) for i in list(array)]               # make into list of ints
+    array = [int(i) for i in list(array)]              # make into list of ints
     sorted_array = quick_sort(array, 0, len(array)-1)
     sorted_array = ''.join(str(i) for i in sorted_array) # make into string
     print('array sorted:  ', sorted_array)
