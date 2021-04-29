@@ -1,6 +1,8 @@
-### Algorithms implemented in Python (for no practical purpose)
+### Algorithms implemented in Python &ndash; just for fun
 
-Directory structure:
+#### Status: active/in progress
+
+Current directory structure:
 ```
 ├── media
 │   └── particle_swarm_formula.png
