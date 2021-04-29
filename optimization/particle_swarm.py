@@ -11,12 +11,12 @@ class ParticleSwarm():
     takes advantage of Numpy broadcasting"""
 
     def __init__(self,
-                 num_particles: int = 100,
+                 num_particles: int = 1000,
                  w: float = 1.0,
                  c1: float = 0.5,
                  c2: float = 0.5,
                  bounds: Optional[Tuple[Optional[float]]] = None,
-                 patience: int = 200,
+                 patience: int = 50,
                  max_iter: Optional[int] = None,
                  verbose: Union[bool, int] = 1) -> None:
 
@@ -28,7 +28,6 @@ class ParticleSwarm():
         self.patience = patience
         self.max_iter = (max_iter or float('inf'))
         self.verbose = verbose
-
 
     def _initialize_particles(self,
                               p0: List[Tuple[float]],
@@ -63,12 +62,16 @@ class ParticleSwarm():
         if self.bounds[0] is not None:
             # update new position, with upper bounds
             p_pos_updated = np.where(
-                p_pos_updated > self.bounds[0], p_pos_updated-(2*p_vel), p_pos_updated)
+                p_pos_updated > self.bounds[0],
+                p_pos_updated-(2*p_vel),
+                p_pos_updated)
 
         if self.bounds[1] is not None:
             # update new position, with lower bounds
             p_pos_updated = np.where(
-                p_pos_updated < self.bounds[1], p_pos_updated-(2*p_vel), p_pos_updated)
+                p_pos_updated < self.bounds[1],
+                p_pos_updated-(2*p_vel),
+                p_pos_updated)
 
         p_pos_updated = p_pos_updated.reshape((self.num_particles, -1))
 
@@ -89,8 +92,8 @@ class ParticleSwarm():
         self.g_best_obj_val = np.inf
 
         k = 1
-        iters_with_no_improvement = 0
-        while (self.patience - iters_with_no_improvement) and k <= self.max_iter:
+        iters_with_no_improv = 0
+        while (self.patience - iters_with_no_improv) and k <= self.max_iter:
 
             obj_val = obj_fn(self.p_pos, *args)
             obj_val_improved = obj_val < obj_fn(self.p_best_pos, *args)
@@ -100,16 +103,18 @@ class ParticleSwarm():
 
             self.iter_best = self.p_best_obj_val.min()
             if self.iter_best < self.g_best_obj_val:
-                self.g_best_pos = self.p_best_pos[np.argmin(self.p_best_obj_val)]
+                best_idx = np.argmin(self.p_best_obj_val)
+                self.g_best_pos = self.p_best_pos[best_idx]
                 self.g_best_obj_val = self.iter_best
-                iters_with_no_improvement = 0
+                iters_with_no_improv = 0
             else:
-                iters_with_no_improvement += 1
+                iters_with_no_improv += 1
 
             if self.verbose:
                 template = "Iter {:05d} : Best particle MAE {:.7f} : "
                 template += "Params [" + "{:.3f} " * len(self.g_best_pos) + "]"
-                print(template.format(k, self.g_best_obj_val, *self.g_best_pos), end='\r')
+                print(template.format(k, self.g_best_obj_val, *self.g_best_pos),
+                      end='\r')
 
             self.p_vel = self._update_velocity(
                 self.p_vel, self.p_pos, self.p_best_pos, self.g_best_pos)
@@ -127,44 +132,47 @@ class ParticleSwarm():
 
 if __name__ == '__main__':
 
-    X, y = np.random.multivariate_normal(
-        mean=[5, 0], cov=[[1.0, 0.9], [0.9, 1.0]], size=1000).T
+    POLY_DEGREE = 5
+    RANDOM_SEED = 2000
+    XLIM = (-2.2, 2.2)
+    NOISE_SIGMA = 0.6
+    NUM_DATAPOINTS = 1000
 
-    ps = ParticleSwarm(
-        num_particles=1000,
-        w=1.0,
-        c1=0.5,
-        c2=0.5,
-        bounds=None,
-        patience=100,
-        max_iter=None,
-        verbose=1
+    def poly_fn(x, coefs):
+        y = coefs[0] * np.ones_like(x)
+        for i, coef in enumerate(coefs[1:]):
+            y += coef * x**(i+1)
+        return y
+
+    def random_data():
+        if RANDOM_SEED: np.random.seed(RANDOM_SEED)
+        coefs = np.random.randn(POLY_DEGREE)
+        x = np.random.uniform(*XLIM, NUM_DATAPOINTS)
+        y = poly_fn(x, coefs) + np.random.randn(x.shape[0]) * NOISE_SIGMA
+        return x, y
+
+    x, y = random_data()
+
+    fitted_coefs = ParticleSwarm().fit(
+        obj_fn=lambda p, x, y: np.square(y-poly_fn(x, p.T[..., None])).mean(1),
+        p0=[(-1, 1)]*POLY_DEGREE,
+        v0=[(0, 0)]*POLY_DEGREE,
+        args=(x, y)
     )
-
-    def obj_fn(params, X, y):
-        # params.T[..., np.newaxis].shape = (num_params, num_particles, 1)
-        theta1, theta0 = params.T[..., np.newaxis]
-        y_hat = X * theta1 + theta0
-        return np.mean(np.square(y - y_hat), axis=1)
-
-    params = ps.fit(
-        obj_fn=obj_fn,
-        p0=[(-1, 1), (-1, 1)],
-        v0=[(0, 0), (0, 0)],
-        args=(X, y)
-    )
-
 
     try:
         import matplotlib.pyplot as plt
         import matplotlib
         matplotlib.use('TkAgg')
 
-        plt.scatter(X, y)
-        linspace = np.linspace(X.min(), X.max(), 1000)
-        plt.plot(linspace, params[0] * linspace + params[1], color='red',
-                 label="y = x * {:.4f} + {:.4f}".format(params[0], params[1]))
+        x_linspace = np.linspace(*XLIM, 1_000)
+        y_linspace = poly_fn(x_linspace, coefs=fitted_coefs)
+        plt.plot(x_linspace, y_linspace, color='C3', label='fitted line')
+        plt.scatter(x, y, s=20, alpha=0.5, label='datapoints')
         plt.legend(fontsize=14)
         plt.show(block=True);
-    except:
-        print("\ny = x * {:.4f} + {:.4f}".format(params[0], params[1]))
+
+    except Exception as e:
+        print(e)
+
+    print()

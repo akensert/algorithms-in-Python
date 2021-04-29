@@ -1,1 +1,1 @@
-### Algorithms implemented in Python &ndash; just for fun
+### Algorithms implemented in Python&mdash;just for fun
