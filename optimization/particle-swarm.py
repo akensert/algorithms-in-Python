@@ -84,32 +84,32 @@ class ParticleSwarm():
         self.p_pos, self.p_vel = self._initialize_particles(p0, v0)
 
         self.p_best_pos = np.zeros(self.p_pos.shape)
-        self.p_best_fitness = np.full((self.p_pos.shape[0],), np.inf)
+        self.p_best_obj_val = np.full((self.p_pos.shape[0],), np.inf)
         self.g_best_pos = np.zeros((self.p_pos.shape[1]))
-        self.g_best_fitness = np.inf
+        self.g_best_obj_val = np.inf
 
         k = 1
         iters_with_no_improvement = 0
         while (self.patience - iters_with_no_improvement) and k <= self.max_iter:
 
-            fitness = obj_fn(self.p_pos, *args)
-            fitness_improved = fitness < obj_fn(self.p_best_pos, *args)
+            obj_val = obj_fn(self.p_pos, *args)
+            obj_val_improved = obj_val < obj_fn(self.p_best_pos, *args)
 
-            self.p_best_pos[fitness_improved] = self.p_pos[fitness_improved]
-            self.p_best_fitness[fitness_improved] = fitness[fitness_improved]
+            self.p_best_pos[obj_val_improved] = self.p_pos[obj_val_improved]
+            self.p_best_obj_val[obj_val_improved] = obj_val[obj_val_improved]
 
-            self.cycle_best = self.p_best_fitness.min()
-            if self.cycle_best < self.g_best_fitness:
-                self.g_best_pos = self.p_best_pos[np.argmin(self.p_best_fitness)]
-                self.g_best_fitness = self.cycle_best
+            self.iter_best = self.p_best_obj_val.min()
+            if self.iter_best < self.g_best_obj_val:
+                self.g_best_pos = self.p_best_pos[np.argmin(self.p_best_obj_val)]
+                self.g_best_obj_val = self.iter_best
                 iters_with_no_improvement = 0
             else:
                 iters_with_no_improvement += 1
 
             if self.verbose:
-                template = "Cycle {:05d} : Best particle MAE {:.7f} : "
+                template = "Iter {:05d} : Best particle MAE {:.7f} : "
                 template += "Params [" + "{:.3f} " * len(self.g_best_pos) + "]"
-                print(template.format(k, self.g_best_fitness, *self.g_best_pos), end='\r')
+                print(template.format(k, self.g_best_obj_val, *self.g_best_pos), end='\r')
 
             self.p_vel = self._update_velocity(
                 self.p_vel, self.p_pos, self.p_best_pos, self.g_best_pos)
