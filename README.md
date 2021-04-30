@@ -12,6 +12,9 @@ Current directory structure:
 ├── README.md
 ├── requirements.txt
 └── sorting
-    ├── mergesort.py
-    └── quicksort.py
+    ├── bubble_sort.py
+    ├── counting_sort.py
+    ├── insertion_sort.py
+    ├── merge_sort.py
+    └── quick_sort.py
 ```
