@@ -7,8 +7,7 @@ np.set_printoptions(suppress=True)
 
 
 class ParticleSwarm():
-    """Implementation of a particle swarm optmiization algorithm, that
-    takes advantage of Numpy broadcasting"""
+    """Implementation of PSO using Numpy"""
 
     def __init__(self,
                  num_particles: int = 1000,
@@ -26,7 +25,7 @@ class ParticleSwarm():
         self.c2 = c2
         self.bounds = bounds or [None, None]
         self.patience = patience
-        self.max_iter = (max_iter or float('inf'))
+        self.max_iter = max_iter or float('inf')
         self.verbose = verbose
 
     def _initialize_particles(self,
