@@ -16,7 +16,8 @@ Current directory structure:
 │   │   └── bfs_shortest_path.py
 │   └── depth_first_search
 │       ├── dfs_find_path.py
-│       └── dfs_find_scc.py
+│       ├── dfs_find_scc.py
+│       └── dfs_topological_sort.py
 └── sorting
     ├── bubble_sort.py
     ├── counting_sort.py
