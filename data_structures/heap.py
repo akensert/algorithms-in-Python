@@ -3,7 +3,7 @@ import warnings
 
 class Heap:
     """
-    Implements a heap that supports extract-min (and not extract-max)
+    Implements a heap data structure that supports extract-min
     """
     def __init__(self, array):
         self.data = []
