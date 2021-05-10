@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+
 def dfs(graph, v, visited, labels):
     global i
     visited[v] = True
