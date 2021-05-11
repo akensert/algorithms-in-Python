@@ -11,7 +11,10 @@ class Node:
 
 
 class BinarySearchTree:
-
+    """
+    OO Binary search tree which allows for insertion and ascending traversal.
+    Yet to implement min/max, deletion, rank, selection etc.
+    """
     def __init__(self, array: List[int]) -> None:
         self.root = None
         for a in array:
@@ -46,5 +49,5 @@ if __name__ == '__main__':
 
     array = [9, 11, 13, 4, 4, 8, 9, 4, 12]
     print("original array:", array)
-    bst = BinarySearchTree(array)
-    print("tree traverse: ", bst.traverse(bst.root))
+    tree = BinarySearchTree(array)
+    print("tree traverse: ", tree.traverse(tree.root))
